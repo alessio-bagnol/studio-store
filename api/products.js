@@ -1,10 +1,25 @@
 const SUPABASE_URL = "https://wvqyqycbtpmewyqakjah.supabase.co";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "sb_publishable_hsctbznMphT4WoDrv7gpfA_AfIRT-9k";
 
+function sanitizeProduct(body) {
+  return {
+    name: body.name || "",
+    category: (body.category || "Puff").trim(),
+    price: body.price || "20,00 €",
+    old_price: body.old_price || "",
+    description: body.description || "",
+    image: body.image || "",
+    stock: parseInt(body.stock) || 0,
+    incoming_stock: parseInt(body.incoming_stock) || 0,
+    available_at: body.available_at || "",
+    flavors: body.flavors || ""
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, apikey, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -25,6 +40,23 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      const cleanData = sanitizeProduct(req.body);
+      
+      // Auto-register category in categories table if new
+      if (cleanData.category && !["Puff", "Airpods"].includes(cleanData.category)) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name: cleanData.category, icon: "🏷️" })
+          });
+        } catch (e) {}
+      }
+
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
         method: "POST",
         headers: {
@@ -33,7 +65,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
           Prefer: "return=representation"
         },
-        body: JSON.stringify(req.body)
+        body: JSON.stringify(cleanData)
       });
       const data = await resp.json();
       return res.status(resp.status).json(data);
@@ -41,6 +73,8 @@ export default async function handler(req, res) {
 
     if (req.method === "PUT") {
       const targetId = id || req.body?.id;
+      const cleanData = sanitizeProduct(req.body);
+
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${targetId}`, {
         method: "PATCH",
         headers: {
@@ -49,7 +83,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
           Prefer: "return=representation"
         },
-        body: JSON.stringify(req.body)
+        body: JSON.stringify(cleanData)
       });
       const data = await resp.json();
       return res.status(resp.status).json(data);
@@ -57,7 +91,7 @@ export default async function handler(req, res) {
 
     if (req.method === "DELETE") {
       const targetId = id || req.query?.id;
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${targetId}`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${targetId}`, {
         method: "DELETE",
         headers: {
           apikey: SUPABASE_KEY,
@@ -69,7 +103,7 @@ export default async function handler(req, res) {
 
     res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
-    console.error("Supabase Products API Error:", error);
+    console.error("Products API error:", error);
     res.status(500).json({ error: error.message });
   }
 }

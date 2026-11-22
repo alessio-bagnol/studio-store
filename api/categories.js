@@ -23,6 +23,21 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      const name = (req.body.name || "").trim();
+      if (!name) return res.status(400).json({ error: "Category name required" });
+
+      // Check if already exists
+      const checkResp = await fetch(`${SUPABASE_URL}/rest/v1/categories?name=eq.${encodeURIComponent(name)}`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const existing = await checkResp.json();
+      if (Array.isArray(existing) && existing.length > 0) {
+        return res.status(200).json(existing[0]);
+      }
+
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
         method: "POST",
         headers: {
@@ -31,10 +46,10 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
           Prefer: "return=representation"
         },
-        body: JSON.stringify(req.body)
+        body: JSON.stringify({ name, icon: req.body.icon || "🏷️" })
       });
       const data = await resp.json();
-      return res.status(resp.status).json(data);
+      return res.status(200).json(data);
     }
 
     res.status(405).json({ error: "Method not allowed" });
