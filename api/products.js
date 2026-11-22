@@ -2,6 +2,13 @@ const SUPABASE_URL = "https://wvqyqycbtpmewyqakjah.supabase.co";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "sb_publishable_hsctbznMphT4WoDrv7gpfA_AfIRT-9k";
 
 function sanitizeProduct(body) {
+  let flavors = body.flavors || "";
+  if (body.couleur !== undefined || body.taille !== undefined) {
+    let parts = [];
+    if (body.couleur && body.couleur.toString().trim()) parts.push(`Couleur: ${body.couleur.toString().trim()}`);
+    if (body.taille && body.taille.toString().trim()) parts.push(`Taille: ${body.taille.toString().trim()}`);
+    if (parts.length > 0) flavors = parts.join(" | ");
+  }
   return {
     name: body.name || "",
     category: (body.category || "Puff").trim(),
@@ -12,7 +19,7 @@ function sanitizeProduct(body) {
     stock: parseInt(body.stock) || 0,
     incoming_stock: parseInt(body.incoming_stock) || 0,
     available_at: body.available_at || "",
-    flavors: body.flavors || ""
+    flavors: flavors
   };
 }
 
