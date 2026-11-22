@@ -1,6 +1,18 @@
 {
   "rewrites": [
     {
+      "source": "/api/products/:id",
+      "destination": "/api/products?id=:id"
+    },
+    {
+      "source": "/api/promocodes/:id",
+      "destination": "/api/promocodes?id=:id"
+    },
+    {
+      "source": "/api/promocodes/use/:code",
+      "destination": "/api/promocodes?use=:code"
+    },
+    {
       "source": "/((?!api/|real_photos/|assets/).*)",
       "destination": "/index.html"
     }
