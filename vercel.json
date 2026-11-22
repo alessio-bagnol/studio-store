@@ -5,6 +5,10 @@
       "destination": "/api/products?id=:id"
     },
     {
+      "source": "/api/formules/:id",
+      "destination": "/api/formules?id=:id"
+    },
+    {
       "source": "/api/promocodes/:id",
       "destination": "/api/promocodes?id=:id"
     },

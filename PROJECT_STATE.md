@@ -2,27 +2,27 @@
 *Dernière mise à jour : 22/11/2026*
 
 ## 🎯 Objectif Global
-Boutique e-commerce moderne (Studio Store) avec base de données PostgreSQL Supabase sécurisée (RLS), stockage d'images Drag & Drop, gestion dynamique des catégories (mise à jour immédiate sur le sélecteur du catalogue client avec icônes intelligentes) et fiches produits aux caractéristiques adaptées par catégorie.
+Boutique e-commerce moderne (Studio Store) avec base de données PostgreSQL Supabase sécurisée (RLS), stockage d'images Drag & Drop, gestion dynamique des catégories, gestion intégrale des Tarifs & Formules (création, modification, suppression), et fiches produits aux caractéristiques adaptées par catégorie.
 
 ## ✨ Dernières Mises à Jour Appliquées
-1. **Fiche Produit dynamique par catégorie (Titres, Icônes et Spécifications)** :
-   - Remplacement des 3 cartes fixes (qui étaient réservées aux Puffs : Saveurs, Capacité, Durée).
-   - Adaptation automatique selon la catégorie du produit :
-     - **Puff / Vape** : ⚡ Saveurs principales, 💨 Capacité (Puffs), 🔋 Durée estimée (USB-C).
-     - **AirPods / Audio / Écouteurs** : 🎧 Audio & Réduction du bruit (ANC/Spatial), 🔋 Autonomie (30h), ⚡ Connectivité & Boîtier (MagSafe).
-     - **Vêtements / Mode / Textile** : 👕 Matière & Qualité (100% Coton), 📏 Coupe & Tailles (S - XL), 🧼 Entretien (30°C).
-     - **Chaussures / Sneakers** : 👟 Modèle & Matériaux, 📏 Pointures (38-45), ✨ Condition & Boîte d'origine.
-     - **Casquettes / Accessoires** : 🧢 Style & Finition, 📐 Taille & Réglage, ☀️ Protection & Usage.
-     - **Montres** : ⌚ Mouvement & Boîtier, 💧 Étanchéité, 🛡️ Garantie & Bracelet.
-     - **Sacs** : 🎒 Matière & Volume, 📏 Dimensions, 🔒 Finition & Zips.
-     - **Autres catégories** : 🏷️ Caractéristiques, 📦 Disponibilité, 🚚 Expédition & Suivi.
-2. **Onglets & Badges de Catégories intelligents** :
+1. **Gestion Complète des Tarifs & Formules (Admin)** :
+   - Ajout du bouton `+ Créer une formule` dans l'en-tête du tableau *Tarifs & Formules*.
+   - Panneau de création intuitif permettant de :
+     - Sélectionner la catégorie ciblée (parmi toutes les catégories existantes ou nouvelles).
+     - Renseigner la quantité du pack (ex: 2, 3, 5, 10...).
+     - Renseigner le prix du pack (ex: 35,00 €).
+   - Possibilité de modifier en place la catégorie, la quantité et le prix de chaque pack.
+   - Ajout du bouton de suppression directe (corbeille rouge) avec demande de confirmation.
+   - Mise à jour de l'API Serverless `/api/formules` (GET, POST, PUT, DELETE) connectée en temps réel à Supabase.
+   - Ajout de la règle de réécriture Vercel `/api/formules/:id`.
+2. **Fiche Produit dynamique par catégorie (Titres, Icônes et Spécifications)** :
+   - Adaptation automatique selon la catégorie du produit (Puff, AirPods, Vêtements, Chaussures, Casquettes, Montres, etc.).
+3. **Onglets & Badges de Catégories intelligents** :
    - Détection automatique et affectation de l'icône correspondante (🚬, 🎧, 👕, 👟, 🧢, ⌚, 🎒, ✨, 📱, 🏷️).
-3. **Formulaire Admin intelligent** :
-   - Le libellé et le placeholder du champ de caractéristiques s'ajustent automatiquement selon la catégorie sélectionnée (ex: "Saveurs" pour Puff, "Matière / Tailles / Couleurs" pour Vêtements, "Caractéristiques Audio" pour AirPods).
-4. **Codes Promos avec conditions avancées & Fenêtre élargie** :
-   - Fenêtre `max-w-2xl`.
-   - Multi-catégories, montant minimum, et nombre d'articles minimum.
+4. **Formulaire Admin adaptatif** :
+   - Libellé et placeholder intelligents selon la catégorie du produit.
+5. **Codes Promos avec conditions avancées & Fenêtre élargie** :
+   - Fenêtre `max-w-2xl`, multi-catégories, montant minimum, et nombre d'articles minimum.
 
 ## 📌 Dépôt GitHub & Déploiement
 - Dépôt : `https://github.com/alessio-bagnol/studio-store`
