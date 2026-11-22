@@ -45,6 +45,17 @@ export default async function handler(req, res) {
       // Auto-register category in categories table if new
       if (cleanData.category && !["Puff", "Airpods"].includes(cleanData.category)) {
         try {
+          const s = cleanData.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          let icon = "🏷️";
+          if (s.includes("puff") || s.includes("vape")) icon = "🚬";
+          else if (s.includes("airpod") || s.includes("audio") || s.includes("ecouteur") || s.includes("casque")) icon = "🎧";
+          else if (s.includes("vetement") || s.includes("habit") || s.includes("mode") || s.includes("textile") || s.includes("t-shirt") || s.includes("polo")) icon = "👕";
+          else if (s.includes("chaussure") || s.includes("sneaker") || s.includes("basket")) icon = "👟";
+          else if (s.includes("casquette") || s.includes("bonnet") || s.includes("chapeau")) icon = "🧢";
+          else if (s.includes("montre") || s.includes("watch")) icon = "⌚";
+          else if (s.includes("sac")) icon = "🎒";
+          else if (s.includes("accessoire") || s.includes("bijou")) icon = "✨";
+
           await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
             method: "POST",
             headers: {
@@ -52,7 +63,7 @@ export default async function handler(req, res) {
               Authorization: `Bearer ${SUPABASE_KEY}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ name: cleanData.category, icon: "🏷️" })
+            body: JSON.stringify({ name: cleanData.category, icon })
           });
         } catch (e) {}
       }
