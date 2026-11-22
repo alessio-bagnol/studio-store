@@ -21,16 +21,31 @@ export default async function handler(req, res) {
         }
       });
       const data = await resp.json();
-      return res.status(200).json(data);
+      
+      // Normalize data: map discount_percent to value and type
+      const normalized = (Array.isArray(data) ? data : []).map(p => {
+        const val = p.value !== undefined && p.value !== null ? p.value : (p.discount_percent || 10);
+        return {
+          ...p,
+          value: val,
+          discount_percent: val,
+          type: p.type || "percent",
+          category: p.category || "all",
+          min_amount: parseFloat(p.min_amount) || 0,
+          min_items: parseInt(p.min_items) || 0
+        };
+      });
+
+      return res.status(200).json(normalized);
     }
 
     if (req.method === "POST") {
       const payload = { ...req.body };
-      if (!payload.discount_percent && payload.value) {
-        payload.discount_percent = parseInt(payload.value) || 10;
-      }
+      const val = parseInt(payload.value) || parseInt(payload.discount_percent) || 10;
+      payload.discount_percent = val;
+      payload.value = val;
+      payload.type = payload.type || "percent";
 
-      // Try inserting full payload
       let resp = await fetch(`${SUPABASE_URL}/rest/v1/promocodes`, {
         method: "POST",
         headers: {
@@ -42,13 +57,13 @@ export default async function handler(req, res) {
         body: JSON.stringify(payload)
       });
 
-      // If failed due to extra columns, fallback to base columns
       if (!resp.ok) {
+        // Fallback if custom columns don't exist yet in Supabase table
         const fallback = {
           code: payload.code,
-          discount_percent: payload.discount_percent || 10,
+          discount_percent: val,
           active: payload.active !== undefined ? payload.active : 1,
-          max_uses: payload.max_uses || 0
+          max_uses: parseInt(payload.max_uses) || 0
         };
         resp = await fetch(`${SUPABASE_URL}/rest/v1/promocodes`, {
           method: "POST",
@@ -68,7 +83,14 @@ export default async function handler(req, res) {
 
     if (req.method === "PUT") {
       const targetId = id || req.body?.id;
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/promocodes?id=eq.${targetId}`, {
+      const val = parseInt(req.body.value) || parseInt(req.body.discount_percent) || 10;
+      const payload = {
+        ...req.body,
+        discount_percent: val,
+        value: val
+      };
+
+      let resp = await fetch(`${SUPABASE_URL}/rest/v1/promocodes?id=eq.${targetId}`, {
         method: "PATCH",
         headers: {
           apikey: SUPABASE_KEY,
@@ -76,8 +98,28 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
           Prefer: "return=representation"
         },
-        body: JSON.stringify(req.body)
+        body: JSON.stringify(payload)
       });
+
+      if (!resp.ok) {
+        const fallback = {
+          code: payload.code,
+          discount_percent: val,
+          active: payload.active !== undefined ? payload.active : 1,
+          max_uses: parseInt(payload.max_uses) || 0
+        };
+        resp = await fetch(`${SUPABASE_URL}/rest/v1/promocodes?id=eq.${targetId}`, {
+          method: "PATCH",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=representation"
+          },
+          body: JSON.stringify(fallback)
+        });
+      }
+
       const data = await resp.json();
       return res.status(resp.status).json(data);
     }
