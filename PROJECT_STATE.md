@@ -1,5 +1,5 @@
 # État du projet : Studio Store
-*Dernière mise à jour : 23/11/2026*
+*Dernière mise à jour : 23/11/2026 a 03:41*
 
 ## 🎯 Objectif Global
 Boutique e-commerce moderne (Studio Store) avec base de données PostgreSQL Supabase sécurisée (RLS), stockage d'images Drag & Drop, gestion dynamique des catégories, gestion intégrale des Tarifs & Formules, et fiches produits aux caractéristiques adaptées par catégorie (avec champs dédiés Couleurs & Tailles pour les vêtements).
