@@ -9,6 +9,12 @@ function sanitizeProduct(body) {
     if (body.taille && body.taille.toString().trim()) parts.push(`Taille: ${body.taille.toString().trim()}`);
     if (parts.length > 0) flavors = parts.join(" | ");
   }
+  let isPreorder = body.allow_preorder === true || body.is_preorder === true || String(body.allow_preorder) === "true";
+  if (isPreorder && !flavors.includes("[PREORDER]")) {
+    flavors = (flavors + " [PREORDER]").trim();
+  } else if (body.allow_preorder === false && flavors.includes("[PREORDER]")) {
+    flavors = flavors.replace(/\s*\[PREORDER\]/g, "").trim();
+  }
   return {
     name: body.name || "",
     category: (body.category || "Puff").trim(),
