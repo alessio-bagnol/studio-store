@@ -29,7 +29,6 @@ export default async function handler(req, res) {
         customer_name: customer_name || "",
         customer_address: customer_address || "",
         customer_phone: customer_phone || "",
-        customer_notes: customer_notes || "",
         items: typeof items === "string" ? items : JSON.stringify(items || []),
         total_amount: parseFloat(total_amount) || 0,
         payment_method: payment_method || "cash",
