@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === "GET") {
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=id.desc`, {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`
@@ -23,16 +23,18 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      const { customer_name, customer_address, customer_phone, customer_notes, items, total_amount, payment_method } = req.body || {};
+      const { customer_name, customer_email, customer_address, customer_phone, items, total_amount } = req.body || {};
 
+      const orderId = `CMD-${Date.now()}`;
       const orderPayload = {
+        id: orderId,
         customer_name: customer_name || "",
-        customer_address: customer_address || "",
+        customer_email: customer_email || "",
         customer_phone: customer_phone || "",
-        items: typeof items === "string" ? items : JSON.stringify(items || []),
-        total_amount: parseFloat(total_amount) || 0,
-        payment_method: payment_method || "cash",
-        status: "pending"
+        customer_address: customer_address || "",
+        items: Array.isArray(items) ? items : [],
+        total_amount: String(total_amount || "0.00"),
+        status: "en_attente"
       };
 
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
