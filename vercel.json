@@ -17,6 +17,26 @@
       "destination": "/api/promocodes?use=:code"
     },
     {
+      "source": "/api/orders/track/:id",
+      "destination": "/api/orders?track=:id"
+    },
+    {
+      "source": "/api/orders/:id/success",
+      "destination": "/api/orders?success=:id"
+    },
+    {
+      "source": "/api/orders/:id/status",
+      "destination": "/api/orders?id=:id"
+    },
+    {
+      "source": "/api/orders/:id",
+      "destination": "/api/orders?id=:id"
+    },
+    {
+      "source": "/api/analytics/:sub*",
+      "destination": "/api/analytics"
+    },
+    {
       "source": "/((?!api/|real_photos/|assets/).*)",
       "destination": "/index.html"
     }
