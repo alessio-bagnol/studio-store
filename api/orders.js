@@ -102,12 +102,48 @@ export default async function handler(req, res) {
       if (!targetId || !status) {
         return res.status(400).json({ error: "ID et statut requis" });
       }
+
+      const existingResp = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${encodeURIComponent(targetId)}&select=status,items`, { headers });
+      const existingData = await existingResp.json();
+      const existingOrder = Array.isArray(existingData) ? existingData[0] : existingData;
+
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${encodeURIComponent(targetId)}`, {
         method: "PATCH",
         headers: { ...headers, Prefer: "return=representation" },
         body: JSON.stringify({ status })
       });
       const data = await resp.json();
+
+      if (resp.ok && existingOrder) {
+        const wasCancelled = existingOrder.status === "annule";
+        const isNowCancelled = status === "annule";
+        if (wasCancelled !== isNowCancelled) {
+          const orderItems = Array.isArray(existingOrder.items)
+            ? existingOrder.items
+            : (typeof existingOrder.items === "string" ? JSON.parse(existingOrder.items || "[]") : []);
+          const deltaSign = isNowCancelled ? 1 : -1;
+
+          for (const item of orderItems) {
+            if (!item?.id || !item?.quantity) continue;
+            try {
+              const pResp = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(item.id)}&select=id,stock`, { headers });
+              const pData = await pResp.json();
+              const prod = Array.isArray(pData) ? pData[0] : pData;
+              if (prod && typeof prod.stock === "number") {
+                const newStock = Math.max(0, prod.stock + deltaSign * (parseInt(item.quantity) || 0));
+                await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(item.id)}`, {
+                  method: "PATCH",
+                  headers,
+                  body: JSON.stringify({ stock: newStock })
+                });
+              }
+            } catch (e) {
+              console.error("Stock restore error for item", item.id, e);
+            }
+          }
+        }
+      }
+
       return res.status(resp.status).json(data);
     }
 
